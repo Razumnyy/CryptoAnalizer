@@ -1,6 +1,6 @@
 import encrypto.EncryptScenario;
 import encrypto.EncryptionManager;
-
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
 
@@ -31,7 +31,7 @@ public class ConsoleHandler {
 
     /**
      * Метод выводит информацию в консоль для пользователя
-     * и обрабатывает полученные от пользователя данные.
+     * и обрабатывает полученные данные.
      */
     public void showConsoleIfo() {
         boolean isWaitingSelectScenario = true;
@@ -51,13 +51,13 @@ public class ConsoleHandler {
                 try {
                     switch (Integer.parseInt(consoleText)) {
                         case 1:
-                            cryptoScenario(scanner);                // сценарий шифрования файла по ключу
+                            cryptoScenario(scanner,EncryptScenario.ENCRYPT_BY_KEY);       // сценарий шифрования файла по ключу
                             break;
                         case 2:
-                            decryptoScenario(scanner);              // сценарий расшифровки файла по ключу
+                            decryptScenario(scanner,EncryptScenario.DECRYPT_BY_KEY);      // сценарий расшифровки файла по ключу
                             break;
                         case 3:
-                            bruteForceScenario(scanner);            // сценарий расшифровки файла перебором всех ключей
+                            bruteForceScenario(scanner,EncryptScenario.BRUT_FORCE);       // сценарий расшифровки файла перебором всех ключей
                             break;
                         default:
                             System.out.println("Введите корректный номер сценария.");
@@ -65,35 +65,71 @@ public class ConsoleHandler {
                 } catch (NumberFormatException ex) {
                     System.out.println("Недопустимое значение.");
                 }
+
+                isWaitingSelectScenario = false;
+
             }
         }
     }
 
     /**
      * Обрабатывает сценарий работы программы связанный с расшифровкой файла по ключу
-     * @param scanner - ссылка на экзепляр класса сканер
+     * @param scanner  ссылка на экзепляр класса сканер
      */
-    private void decryptoScenario(Scanner scanner) {
-        System.out.println("расшифровка файла по ключу");
+    private void decryptScenario(Scanner scanner, EncryptScenario encryptScenario) {
+        final int key = getKeyFromConsole(scanner);                                    // Получаем ключ из консоли
+        final Path inputPath = getInputPathFromConsole(scanner,encryptScenario);       // Получаем путь к файлу для чтения
+        final Path outputPath = getOutputPathFromConsole(scanner,encryptScenario);     // Получаем путь к файлу для записи
+
+        // Устанавливаем ключ и режим работы шифроватора
+        this.encryptionManager.initialize(key,encryptScenario);
+
+        // Устанавливаем пути к файлам для считывания и записи
+        this.fileDataManger.initialize(inputPath,outputPath);
     }
 
     /**
      * Обрабатывает сценарий работы программы связанный с шифрованием файла по ключу
-     * @param scanner - ссылка на экзепляр класса сканер
+     * Получает от пользователя ключ и пути к файлам для чтения / записи
+     * @param scanner  ссылка на экзепляр класса сканер
      */
-    private void cryptoScenario(Scanner scanner) {
-        encryptionManager.initialize(getKeyFromConsole(scanner),EncryptScenario.ENCRYPT_BY_KEY);
+    private void cryptoScenario(Scanner scanner,EncryptScenario encryptScenario) {
+        final int key = getKeyFromConsole(scanner);                                    // Получаем ключ из консоли
+        final Path inputPath = getInputPathFromConsole(scanner,encryptScenario);       // Получаем путь к файлу для чтения
+        final Path outputPath = getOutputPathFromConsole(scanner,encryptScenario);     // Получаем путь к файлу для записи
+
+
+        // Устанавливаем ключ и режим работы шифроватора
+        this.encryptionManager.initialize(key,encryptScenario);
+
+        // Устанавливаем пути к файлам для считывания и записи
+        this.fileDataManger.initialize(inputPath,outputPath);
 
     }
 
     /**
      * Обрабатывает сценарий работы программы связанный с расшифровкой файла перебором всех ключей
-     * @param scanner - ссылка на экзепляр класса сканер
+     * @param scanner  ссылка на экзепляр класса сканер
      */
-    private void bruteForceScenario(Scanner scanner) {
-        System.out.println("расшифровка файла перебором всех ключей");
+    private void bruteForceScenario(Scanner scanner,EncryptScenario encryptScenario) {
+        final int key = 0;                                                                // Заглушка
+        final Path inputPath = getInputPathFromConsole(scanner,encryptScenario);          // Получаем путь к файлу для чтения
+        final Path outputPath = getOutputPathFromConsole(scanner,encryptScenario);        // Получаем путь к файлу для записи
+
+
+        // Устанавливаем ключ и режим работы шифроватора
+        this.encryptionManager.initialize(key,encryptScenario);
+
+        // Устанавливаем пути к файлам для считывания и записи
+        this.fileDataManger.initialize(inputPath,outputPath);
     }
 
+    /**
+     * Запрашивает у пользователя ключ для шифрования / дешифрования файла по ключу
+     * проверяет переданный ключ на валидность
+     * @param scanner - ссылка на экземпляр класса Scanner для вывода инф в консоль
+     * @return int - валидный ключ
+     */
     private int getKeyFromConsole(Scanner scanner){
         boolean isWaitingForKey = true;
         int keyFromConsole = 0;
@@ -119,24 +155,61 @@ public class ConsoleHandler {
 
     /**
      * Получает из консоли путь к файлу из которого нужно считать данные
-     * @param scanner - ссылка на сканнер
-     * @param encryptMode - сенарий шифрования
-     * @return Path - путь к файлу для считывания
+     * проверяет переданный путь на валидность
+     * @param scanner  ссылка на сканнер
+     * @param encryptScenario  сенарий шифрования
+     * @return Path  путь к файлу для считывания
      */
-    private Path getInputPathFromConsole(Scanner scanner, EncryptScenario encryptMode){
-        //TODO - доделать метод
-        return null;
+    private Path getInputPathFromConsole(Scanner scanner, EncryptScenario encryptScenario){
+        boolean isWaitingFilePath = true;
+        Path inputPath = null;
+
+        System.out.printf("Введите абсолютный путь к файлу, который нужно %S: \n",
+                (encryptScenario == EncryptScenario.ENCRYPT_BY_KEY ? "зашифровать" : "дешифровать"));
+
+        while (isWaitingFilePath) {
+            try {
+                inputPath = Path.of(scanner.nextLine());
+                if (!inputPath.isAbsolute() || !Files.exists(inputPath))
+                    throw new NumberFormatException();
+
+                isWaitingFilePath = false;
+
+            } catch (NumberFormatException ex) {
+                System.out.println("Введите корректный путь к файлу");
+            }
+        }
+
+        return inputPath;
     }
 
     /**
      * Получает из консоли путь к файлу в который нужно записать данные
-     * @param scanner - ссылка на сканнер
-     * @param encryptMode - сенарий шифрования
+     * Проверяет переданный путь на валидность
+     * @param scanner  ссылка на сканнер
+     * @param encryptScenario  сенарий шифрования
      * @return Path - путь к файлу для записи
      */
-    private Path getOutputPathFromConsole(Scanner scanner, EncryptScenario encryptMode){
-        //TODO - доделать метод
-        return null;
+    private Path getOutputPathFromConsole(Scanner scanner, EncryptScenario encryptScenario){
+        boolean isWaitingFilePath = true;
+        Path outputPath = null;
+
+        System.out.println("Введите абсолютный путь к файлу, в который необходимо записать результат:");
+
+        while (isWaitingFilePath) {
+            try {
+                outputPath = Path.of(scanner.nextLine()).normalize();
+                if (!outputPath.isAbsolute() || !Files.exists(outputPath))
+                    throw new NumberFormatException();
+
+                isWaitingFilePath = false;
+
+            } catch (NumberFormatException ex) {
+                System.out.println("Введите корректный путь к файлу");
+            }
+        }
+
+        return outputPath;
     }
 
 }
