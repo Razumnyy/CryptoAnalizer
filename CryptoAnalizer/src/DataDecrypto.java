@@ -1,4 +1,5 @@
-package encrypto;
+import java.util.Arrays;
+
 /**
  * Класс DataDecrypto предоставляет функциональность для расшифровки данных.
  */
@@ -15,7 +16,21 @@ public class DataDecrypto {
      * @return String расшифрованный текст
      */
     public String decryptByKey(String textForDecrypt,int key){
-        return null;
+        int symbol = 0;
+        char [] arrChars = textForDecrypt.toCharArray();
+        System.out.println(Arrays.toString(arrChars));
+        for (int i = 0; i < arrChars.length; i++) {
+            symbol = (int) arrChars[i] & 0xFF;
+
+            if (symbol > Alphabet.alphabetByASCII.length) {                                          // Если элемент не найден в алфавите
+                throw new RuntimeException("Не корректный символ + " + symbol);
+            }else if ( (symbol+key) > (Alphabet.alphabetByASCII.length-1)) {                         // Если индекс элемента + ключ выходят за длину алфавита
+                arrChars[i] = (char) Math.abs(symbol + key - (Alphabet.alphabetByASCII.length-1));
+            }else                                                                                    // Во всех остальных случаях
+                arrChars[i] = (char) (symbol+key);
+        }
+
+        return new String(arrChars);
     }
 
     /**

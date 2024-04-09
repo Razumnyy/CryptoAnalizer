@@ -1,5 +1,3 @@
-import encrypto.EncryptScenario;
-import encrypto.EncryptionManager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -134,13 +132,12 @@ public class ConsoleHandler {
         boolean isWaitingForKey = true;
         int keyFromConsole = 0;
 
-        System.out.printf("[Негативное значение = смещение в лево, положительное = смещение в право]\n " +
-                "Введите ключ в диапазоне от -%d до %d \n",Alphabet.rusAlphabet.length-1,Alphabet.rusAlphabet.length-1);
+        System.out.printf("Введите ключ в диапазоне от 0 до %d \n",Alphabet.alphabetByASCII.length-1);
 
         while (isWaitingForKey) {
             try {
                 keyFromConsole = Integer.parseInt(scanner.nextLine());
-                if (Math.abs(keyFromConsole) > Alphabet.rusAlphabet.length - 1)
+                if (keyFromConsole < 0 || keyFromConsole > Alphabet.alphabetByASCII.length - 1)
                     throw new NumberFormatException();
 
                 isWaitingForKey = false;

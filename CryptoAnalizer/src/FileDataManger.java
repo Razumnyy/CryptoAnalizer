@@ -1,8 +1,5 @@
-import encrypto.EncryptionManager;
 import java.io.*;
-import java.nio.Buffer;
-import java.nio.CharBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
@@ -29,7 +26,6 @@ public class FileDataManger {
         if (inputPath == null || outputPath == null)
             throw new RuntimeException("Отсутствует путь к файлу");
 
-
         // Если одинаковый путь для чтения и записи, то используем  channel
         if (inputPath.equals(outputPath))
             processAndWriteToMainFile();
@@ -45,12 +41,13 @@ public class FileDataManger {
     public void processAndWriteToOtherFile(){
         String textAfterCryptoAnalyze = null;
 
-        try (BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath.toFile())));
-            BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath.toFile()))))  {
+        try (BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath.toFile()),StandardCharsets.UTF_8));
+             BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath.toFile()),StandardCharsets.UTF_8)))  {
 
             while (inputStream.ready()){
                 textAfterCryptoAnalyze = encryptionManager.launchCryptoAnalyzer(inputStream.readLine());
                 outputStream.write(textAfterCryptoAnalyze);
+                outputStream.write('\n');
             }
 
         } catch (FileNotFoundException e) {
