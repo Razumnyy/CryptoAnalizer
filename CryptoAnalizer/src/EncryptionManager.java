@@ -5,10 +5,9 @@ import java.util.List;
  * Он управляет операциями шифрования и дешифрования с использованием различных алгоритмов и ключей.
  */
 public class EncryptionManager   {
-
-    private int key;                                                         // Ключ для шифрования / дешифрование данных
-    private EncryptScenario encryptScenario;                                 // Сценарий работы шифровщика
-    private static EncryptionManager encryptionManager;                      // Ссылка на экзмепляр класса крипто-анализатора
+    private int key;                                                            // Ключ для шифрования / дешифрование данных
+    private EncryptScenario encryptScenario;                                    // Сценарий работы шифровщика
+    private static EncryptionManager encryptionManager;                         // Ссылка на экзмепляр класса крипто-анализатора
     private final DataDecrypt dataDecrypt = DataDecrypt.getInstance();          // Ссылка на экземпляр класса, отвечающего за расшифровку данных
     private final DataEncrypt dataEncrypt = DataEncrypt.getInstance();          // Ссылка на экземпляр класса, отвечающего за шифрование данных
     private EncryptionManager(){}

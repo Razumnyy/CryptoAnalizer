@@ -12,7 +12,7 @@ public class Runner {
         consoleHandler.showConsoleIfo();
 
         // Отвечает за работу с файлом (чтение / запись)
-        // Вызывает методы по шифрованию дешефрованию файла
+        // Вызывает методы по шифрованию дешифрованию файла
         FileDataManger fileDataManger = FileDataManger.getInstance();
         fileDataManger.launchFileDataManager();
 

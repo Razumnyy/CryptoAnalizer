@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class FileDataManger {
 
-    private Path inputPath;                             // Путь к файлу для считывания
-    private Path outputPath;                            // Путь к файлу для записи
+    private Path inputPath;                                   // Путь к файлу для считывания
+    private Path outputPath;                                  // Путь к файлу для записи
     private final EncryptionManager encryptionManager         // Ссылка на крипто-анализатор
             = EncryptionManager.getInstance();
     private static FileDataManger fileDataManger;
@@ -33,8 +33,8 @@ public class FileDataManger {
 
     /**
      * Инициализирует экземпляр класса
-     * @param inputPath - путь к файлу для считывания
-     * @param outputPath - путь к файлу для записи
+     * @param inputPath путь к файлу для считывания
+     * @param outputPath путь к файлу для записи
      */
     public void initialize(Path inputPath, Path outputPath){
         this.inputPath = inputPath;
