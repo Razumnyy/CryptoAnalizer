@@ -1,6 +1,10 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Класс FileDataManager предоставляет функциональность для управления данными в файлах.
@@ -9,74 +13,13 @@ import java.nio.file.Path;
  */
 public class FileDataManger {
 
-    private Path inputPath;             // Путь к файлу для считывания
-    private Path outputPath;            // Путь к файлу для записи
-    private EncryptionManager encryptionManager = EncryptionManager.getInstance();
+    private Path inputPath;                             // Путь к файлу для считывания
+    private Path outputPath;                            // Путь к файлу для записи
+    private final EncryptionManager encryptionManager         // Ссылка на крипто-анализатор
+            = EncryptionManager.getInstance();
     private static FileDataManger fileDataManger;
-
-
     private FileDataManger(){}
 
-
-    /**
-     * Запускает процесс считывания и записи измененных файлов в зависимости от сценария работы программы
-     */
-    public void launchFileDataManager(){
-        //TODO - добавить свое исключение
-        if (inputPath == null || outputPath == null)
-            throw new RuntimeException("Отсутствует путь к файлу");
-
-        // Если одинаковый путь для чтения и записи, то используем  channel
-        if (inputPath.equals(outputPath))
-            processAndWriteToMainFile();
-        else // иначе через поток
-            processAndWriteToOtherFile();
-    }
-
-    /**
-     * Считывает текст из файла, вызывает метод класса EncryptionManager для шифровки/расшифровки
-     * результат выполнения записывает в файл
-     * (используется при работе с разными файлами для считывания и записи)
-     */
-    public void processAndWriteToOtherFile(){
-        String textAfterCryptoAnalyze = null;
-
-        try (BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath.toFile()),StandardCharsets.UTF_8));
-             BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath.toFile()),StandardCharsets.UTF_8)))  {
-
-            while (inputStream.ready()){
-                textAfterCryptoAnalyze = encryptionManager.launchCryptoAnalyzer(inputStream.readLine());
-                outputStream.write(textAfterCryptoAnalyze);
-                outputStream.write('\n');
-            }
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Считывает текст из файла, вызывает метод класса EncryptionManager для шифровки/расшифровки
-     * результат выполнения записывает в файл
-     * (используется при работе с одним файлом как для чтения так и для записи)
-     */
-    public void processAndWriteToMainFile(){
-        String textAfterCryptoAnalyze = null;
-
-        /*try (RandomAccessFile randomAccessFile = new RandomAccessFile(this.inputPath.toFile(),"rw");
-             FileChannel fileChannel = randomAccessFile.getChannel()){
-
-            CharBuffer charBuffer = CharBuffer.allocate(1024);
-            int charRead = fileChannel.read(charBuffer);
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
-    }
     /**
      * Создает единственный экзмепляр класс FileDataManger, если он еще не создан.
      * @return FileDataManger - ссылка на экзмепляр класса.
@@ -97,7 +40,70 @@ public class FileDataManger {
         this.inputPath = inputPath;
         this.outputPath = outputPath;
     }
-    public void setInputPath(Path inputPath) { this.inputPath = inputPath; }
-    public void setOutputPath(Path outputPath) { this.outputPath = outputPath; }
+
+    /**
+     * Запускает процесс считывания и записи измененных файлов в зависимости от сценария работы программы
+     */
+    public void launchFileDataManager() {
+        if (inputPath == null || outputPath == null)     // Если нет пути к файлу - ошибка
+            throw new RuntimeException("Отсутствует путь к файлу");
+        else
+            writeToFile();
+    }
+
+    /**
+     * Считывает текст из файла, вызывает метод класса EncryptionManager для шифровки/расшифровки
+     * результат выполнения записывает в файл
+     * (используется при работе с разными файлами для считывания и записи)
+     */
+    public void writeToFile(){
+        LocalDateTime timeStartCryptoAnalyze;
+        LocalDateTime timeFinishCryptoAnalyze;
+
+        timeStartCryptoAnalyze = LocalDateTime.now();       // Фиксирует время начало работы крипто-анализатора
+        //-------------------------------------------
+        try {
+            List <String> textFromFile = Files.readAllLines(inputPath);
+            textFromFile = encryptionManager.launchCryptoAnalyzer(textFromFile);
+            Files.write(outputPath,textFromFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //-------------------------------------------
+        timeFinishCryptoAnalyze = LocalDateTime.now();      // Фиксирует время окончания работы крипто-анализатора
+        System.out.printf("Работа анализатора завершена, длительность работы - %s",
+                Duration.between(timeStartCryptoAnalyze,timeFinishCryptoAnalyze).toString().substring(2));
+    }
+
+    /**
+     * Считывает текст из файла, вызывает метод класса EncryptionManager для шифровки/расшифровки
+     * результат выполнения записывает в файл
+     * (используется при работе с разными файлами для считывания и записи)
+     */
+    @Deprecated
+    public void writeToOtherFile(){
+        String textAfterCryptoAnalyze = null;
+        LocalDateTime timeStartCryptoAnalyze;
+        LocalDateTime timeFinishCryptoAnalyze;
+
+        timeStartCryptoAnalyze = LocalDateTime.now();       // Фиксирует время начало работы крипто-анализатора
+        //-------------------------------------------
+        try (BufferedReader inputStream = new BufferedReader(new InputStreamReader(new FileInputStream(inputPath.toFile()),StandardCharsets.UTF_8));
+             BufferedWriter outputStream = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath.toFile()),StandardCharsets.UTF_8)))  {
+
+            while (inputStream.ready()){
+            //    textAfterCryptoAnalyze = encryptionManager.launchCryptoAnalyzer(inputStream.readLine(),null);
+                outputStream.write(textAfterCryptoAnalyze);
+                outputStream.write('\n');
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //-------------------------------------------
+        timeFinishCryptoAnalyze = LocalDateTime.now();      // Фиксирует время окончания работы крипто-анализатора
+        System.out.printf("Работа анализатора завершена,длительность работы - %s",
+                Duration.between(timeStartCryptoAnalyze,timeFinishCryptoAnalyze).toString().substring(2));
+    }
 
 }
