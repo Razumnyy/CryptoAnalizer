@@ -45,22 +45,14 @@ public class ConsoleHandler {
 
                 consoleText = scanner.nextLine();
                 isWaitingSelectScenario = false;
+
                 try {
                     switch (Integer.parseInt(consoleText)) {
-                        case 1:
-                            cryptoScenario(scanner);       // сценарий шифрования файла по ключу
-                            break;
-                        case 2:
-                            decryptScenario(scanner);      // сценарий расшифровки файла по ключу
-                            break;
-                        case 3:
-                            bruteForceScenario(scanner);   // сценарий расшифровки файла перебором всех ключей
-                            break;
-                        case 4:
-                            statAnalyzeScenario(scanner);  // сценарий расшифровки файла статическим анализом
-                            break;
-                        default:
-                            throw new NumberFormatException(consoleText);
+                        case 1 -> cryptoScenario(scanner);                          // сценарий шифрования файла по ключу
+                        case 2 -> decryptScenario(scanner);                         // сценарий расшифровки файла по ключу
+                        case 3 -> bruteForceScenario(scanner);                      // сценарий расшифровки файла перебором всех ключей
+                        case 4 -> statAnalyzeScenario(scanner);                     // сценарий расшифровки файла статическим анализом
+                        default -> throw new NumberFormatException(consoleText);
                     }
                 } catch (NumberFormatException ex) {
                     System.out.printf("Недопустимое значение. (%s) \n" +
@@ -69,7 +61,9 @@ public class ConsoleHandler {
                 }
 
             }
+
         }
+
     }
 
     /**

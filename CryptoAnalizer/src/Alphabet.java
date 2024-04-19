@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class Alphabet {
     private static boolean isSortedArrays = false;
+
     private static final List<String> frequentWordsRepository = Arrays.asList("им","их","из","он","она","они","оно","мы","вы","тот","этот",
             "но","на","или","быть","делать","идти","себя","свой","этот","мой","ваш","как","так","чтобы","потому что","поскольку","также","том","там",
             "ними","через","над","под","за","не","нет","да","уже","как","когда","где","что","ей","по");
